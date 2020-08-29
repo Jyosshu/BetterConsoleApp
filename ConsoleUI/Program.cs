@@ -18,8 +18,6 @@ namespace ConsoleUI
 
             Log.Logger = new LoggerConfiguration()
                 .ReadFrom.Configuration(builder.Build())
-                .Enrich.FromLogContext()
-                .WriteTo.Console()
                 .CreateLogger();
 
             Log.Logger.Information("Application Starting");
@@ -32,8 +30,20 @@ namespace ConsoleUI
                 .UseSerilog()
                 .Build();
 
-            var svc = ActivatorUtilities.CreateInstance<GreetingService>(host.Services);
-            svc.Run();
+            try
+            {
+                var svc = ActivatorUtilities.CreateInstance<GreetingService>(host.Services);
+                svc.Run();
+                Log.Information("Application Ending");
+            }
+            catch (Exception ex)
+            {
+                Log.Fatal(ex, "The application failed to start correctly");
+            }
+            finally
+            {
+                Log.CloseAndFlush();
+            }
         }
 
         static void BuildConfig(IConfigurationBuilder builder)
